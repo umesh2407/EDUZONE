@@ -1,111 +1,196 @@
+// const Course = require("../models/Course");
+// const Category = require("../models/Category");
+// const CourseProgress = require("../models/CourseProgress")
+// const User = require("../models/User");
+// const {uploadImageToCloudinary} = require("../utils/imageUploader")
+// const Section = require('../models/Section');
+// const SubSection = require('../models/SubSection');
+// const {convertSecondsToDuration} = require("../utils/secToDuration")
+
+// //create course
+// exports.createCourse = async (req, res) => {
+//     try{
+//         // fetch data 
+//         let {courseName, 
+//             courseDescription, 
+//             whatYouWillLearn, 
+//             price, 
+//             category,
+//             instructions : _instructions,
+//             tags : _tags,
+//             status
+//         } = req.body;
+//         console.log(req.body);
+        
+//         // fetch thumbnail
+//         const thumbnail = req.files.thumbnailImage;
+//         // console.log("Thumbnail", thumbnail)
+
+//         // Convert the tag and instructions from stringified Array to Array
+//         const tags = _tags.split(',').map(tag => tag.trim());
+//         const instructions = _instructions.split(',').map(instruction => instruction.trim());
+//         if (!status || status === undefined) {
+//             status = "Draft"
+//         }
+
+//         // Validation
+//         if(!courseName || !courseDescription ||!whatYouWillLearn || !price || !category || !thumbnail || !instructions.length || !tags.length){
+//             return res.status(400).json({
+//                 succss : false,
+//                 message : "All fields are required"
+//             });
+//         }
+
+//         // check for instructor
+//         const userId = req.user.id;
+//         const instructorDetails = await User.findById(userId, {
+//             accountType: "Instructor"});
+//         // console.log("Instructor Details", instructorDetails);
+
+//         if(!instructorDetails) {
+//             return res.status(404).json({
+//                 succss : false,
+//                 message : "Instructor deails not found!"
+//             });
+//         }
+
+//         // check given Category is valid or not
+//         const categoryDetails = await Category.findById(category);
+//         if(!categoryDetails) {
+//             return res.status(404).json({
+//                 succss : false,
+//                 message : "Category deails not found!"
+//             });
+//         }
+
+//         // upload image to cloudinary
+//         const thumbnailImage = await uploadImageToCloudinary(thumbnail, process.env.FOLDER_NAME, 300, 85);
+
+//         // create an entry for new course
+//         const newCourse = await Course.create({
+//             courseName,
+//             courseDescription,
+//             instructor : instructorDetails._id,
+//             category : categoryDetails._id,
+//             whatYouWillLearn,
+//             price,
+//             thumbnail : thumbnailImage.secure_url,
+//             tags,
+//             instructions,
+//             status
+//         });
+
+//         // Update user - add the new course to the schema of instructor
+//         await User.findByIdAndUpdate(
+//             {_id : instructorDetails._id},
+//             {
+//                 $push : {
+//                     courses : newCourse._id,
+//                 },
+//             },
+//             {new : true})
+        
+//         // Update the category schema
+//         await Category.findByIdAndUpdate({_id: categoryDetails._id}, {$push:{courses : newCourse._id}},{new:true});
+
+//         // return response
+//         return res.status(200).json({
+//             success : true,
+//             message : "Course created successfully",
+//             data : newCourse
+//         })
+
+//     }catch(error){
+//         console.log(error);
+//         return res.status(500).json({
+//             success : false,
+//             message : "Failed to create course. Please try again",
+//             error : error.message
+//         });
+//     }
+// }
 const Course = require("../models/Course");
 const Category = require("../models/Category");
-const CourseProgress = require("../models/CourseProgress")
+const CourseProgress = require("../models/CourseProgress");
 const User = require("../models/User");
-const {uploadImageToCloudinary} = require("../utils/imageUploader")
+const { uploadImageToCloudinary } = require("../utils/imageUploader");
 const Section = require('../models/Section');
 const SubSection = require('../models/SubSection');
-const {convertSecondsToDuration} = require("../utils/secToDuration")
+const { convertSecondsToDuration } = require("../utils/secToDuration");
 
-//create course
 exports.createCourse = async (req, res) => {
-    try{
-        // fetch data 
-        let {courseName, 
-            courseDescription, 
-            whatYouWillLearn, 
-            price, 
-            category,
-            instructions : _instructions,
-            tags : _tags,
-            status
-        } = req.body;
-        console.log(req.body);
+    try {
+        let { courseName, courseDescription, whatYouWillLearn, price, category, instructions, tags, status } = req.body;
         
-        // fetch thumbnail
-        const thumbnail = req.files.thumbnailImage;
-        // console.log("Thumbnail", thumbnail)
+        // Convert comma-separated strings to arrays
+        const tagsArray = tags ? tags.split(',').map(tag => tag.trim()) : [];
+        const instructionsArray = instructions ? instructions.split(',').map(instruction => instruction.trim()) : [];
+        
+        // Default status to "Draft" if not provided
+        if (!status) status = "Draft";
 
-        // Convert the tag and instructions from stringified Array to Array
-        const tags = _tags.split(',').map(tag => tag.trim());
-        const instructions = _instructions.split(',').map(instruction => instruction.trim());
-        if (!status || status === undefined) {
-            status = "Draft"
-        }
-
-        // Validation
-        if(!courseName || !courseDescription ||!whatYouWillLearn || !price || !category || !thumbnail || !instructions.length || !tags.length){
+        // Validate required fields
+        if (!courseName || !courseDescription || !whatYouWillLearn || !price || !category) {
             return res.status(400).json({
-                succss : false,
-                message : "All fields are required"
+                success: false,
+                message: "All fields are required"
             });
         }
 
-        // check for instructor
+        // Validate instructor
         const userId = req.user.id;
-        const instructorDetails = await User.findById(userId, {
-            accountType: "Instructor"});
-        // console.log("Instructor Details", instructorDetails);
-
-        if(!instructorDetails) {
+        const instructorDetails = await User.findById(userId, { accountType: "Instructor" });
+        if (!instructorDetails) {
             return res.status(404).json({
-                succss : false,
-                message : "Instructor deails not found!"
+                success: false,
+                message: "Instructor details not found!"
             });
         }
 
-        // check given Category is valid or not
+        // Validate category
         const categoryDetails = await Category.findById(category);
-        if(!categoryDetails) {
+        if (!categoryDetails) {
             return res.status(404).json({
-                succss : false,
-                message : "Category deails not found!"
+                success: false,
+                message: "Category details not found!"
             });
         }
 
-        // upload image to cloudinary
-        const thumbnailImage = await uploadImageToCloudinary(thumbnail, process.env.FOLDER_NAME, 300, 85);
+        // Upload thumbnail to Cloudinary
+        const thumbnailImage = await uploadImageToCloudinary(req.files.thumbnailImage, process.env.FOLDER_NAME, 300, 85);
 
-        // create an entry for new course
+        // Create new course
         const newCourse = await Course.create({
             courseName,
             courseDescription,
-            instructor : instructorDetails._id,
-            category : categoryDetails._id,
+            instructor: instructorDetails._id,
+            category: categoryDetails._id,
             whatYouWillLearn,
             price,
-            thumbnail : thumbnailImage.secure_url,
-            tags,
-            instructions,
+            thumbnail: thumbnailImage.secure_url,
+            tags: tagsArray,
+            instructions: instructionsArray,
             status
         });
 
-        // Update user - add the new course to the schema of instructor
-        await User.findByIdAndUpdate(
-            {_id : instructorDetails._id},
-            {
-                $push : {
-                    courses : newCourse._id,
-                },
-            },
-            {new : true})
-        
-        // Update the category schema
-        await Category.findByIdAndUpdate({_id: categoryDetails._id}, {$push:{courses : newCourse._id}},{new:true});
+        // Update user's courses
+        await User.findByIdAndUpdate(instructorDetails._id, { $push: { courses: newCourse._id } });
 
-        // return response
+        // Update category's courses
+        await Category.findByIdAndUpdate(categoryDetails._id, { $push: { courses: newCourse._id } });
+
         return res.status(200).json({
-            success : true,
-            message : "Course created successfully",
-            data : newCourse
-        })
+            success: true,
+            message: "Course created successfully",
+            data: newCourse
+        });
 
-    }catch(error){
-        console.log(error);
+    } catch (error) {
+        console.error(error);
         return res.status(500).json({
-            success : false,
-            message : "Failed to create course. Please try again",
-            error : error.message
+            success: false,
+            message: "Failed to create course. Please try again",
+            error: error.message
         });
     }
 }

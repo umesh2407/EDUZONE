@@ -14,7 +14,7 @@ exports.contactUsController = async (req, res) => {
 
         const emailResponse = await mailSender(email, "Your message sent successfully", contactUsEmail(email, firstname, lastname, message, phoneNo, countryCode));
 
-        const emailToStudyNotion = await mailSender('rangrezsaqib773@gmail.com', `Mail recieved from ${firstname} ${lastname}`, contactUsEmail(email, firstname, lastname, message, phoneNo, countryCode))
+        const emailToStudyNotion = await mailSender('choudharyumesh986@gmail.com', `Mail recieved from ${firstname} ${lastname}`, contactUsEmail(email, firstname, lastname, message, phoneNo, countryCode))
         
         // console.log("Email Res ", emailResponse)
         return res.json({
