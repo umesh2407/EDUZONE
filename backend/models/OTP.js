@@ -1,47 +1,40 @@
-const mongoose = require('mongoose');
-const mailSender = require('../utils/mailSender');
+const mongoose = require("mongoose");
+const mailSender = require("../utils/mailSender");
+const otpTemplate = require("../mail/templates/emailVerificationTemplate")
 
 const OTPSchema = new mongoose.Schema({
-    email: {
-        type: String,
-        required: true
+    email : {
+        type : String,
+        required : true,
     },
-    otp: {
-        type: String,
-        required: true
+    otp : {
+        type : String,
+        required : true
     },
-    createdAt: {
-        type: Date,
-        default: Date.now(),
-        expires: 5 * 60, // The document will be automatically deleted after 3 minutes of its creation time
+    createdAt : {
+        type : Date,
+        default : Date.now(),
+        expires : 5*60*1000
     }
-
 });
 
-//  function to send email
-async function sendVerificationEmail(email, otp) {
-    try {
-        const mailResponse = mailSender(email, 'Verification Email from StudyNotion', otp);
-        console.log('Email sent successfully to - ', email);
-
-    }
-    catch (error) {
-        console.log('Error while sending an email to ', email);
-        throw new error;
+//  a function to send email
+async function sendVerificationEmail (email, otp) {
+    try{
+        const mailResponse = await mailSender(email, "Verification Email", otpTemplate(`${otp}`));
+        console.log("Email sent Successfully:", mailResponse)
+    }catch(error){
+        console.log("Error occurd while sending maik",error);
+        throw error;
     }
 }
 
-// pre middleware
-OTPSchema.pre('save', async (next) => {
-    // console.log("New document saved to database");
-
-    // Only send an email when a new document is created
+// Define a post-save hook to send email after the document has been saved
+OTPSchema.pre("save", async function(next) {
     if (this.isNew) {
-        await sendVerificationEmail(this.email, this.otp);
-    }
+		await sendVerificationEmail(this.email, this.otp);
+	}
     next();
 })
 
-
-
-module.exports = mongoose.model('OTP', OTPSchema);
+module.exports = mongoose.model("OTP", OTPSchema);

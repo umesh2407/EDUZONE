@@ -1,27 +1,28 @@
-const nodemailer = require('nodemailer');
+const nodemailer = require("nodemailer");
+require("dotenv").config();
 
 const mailSender = async (email, title, body) => {
-    try {
-        const transporter = nodemailer.createTransport({
-            host: process.env.MAIL_HOST,
-            auth: {
-                user: process.env.MAIL_USER,
-                pass: process.env.MAIL_PASS
-            }
-        });
-
-        const info = await transporter.sendMail({
-            from: 'StudyNotion || by Aniruddha Gade',
-            to: email,
-            subject: title,
-            html: body
-        });
-
-        // console.log('Info of sent mail - ', info);
-        return info;
+    try{
+        let transporter = nodemailer.createTransport({
+            host: 'smtp.ethereal.email',
+    port: 587,
+    auth: {
+        user: 'uriel.huel29@ethereal.email',
+        pass: 'e5Pxvhv2G6ReghXP3G'
     }
-    catch (error) {
-        console.log('Error while sending mail (mailSender) - ', email);
+        });
+
+        let info = await transporter.sendMail({
+            from : 'StudyNotion || CodeVita - by Saqib',
+            to : `${email}`,
+            subject : `${title}`,
+            html : `${body}`
+        });
+
+        // console.log("Mail Body", info);
+        return info;
+    }catch(error){
+        console.log(error.message);
     }
 }
 
