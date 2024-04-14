@@ -11,9 +11,6 @@ import Loading from './../components/common/Loading';
 import { getCatalogPageData } from '../services/operations/pageAndComponentData'
 import { fetchCourseCategories } from './../services/operations/courseDetailsAPI';
 
-
-
-
 function Catalog() {
 
     const { catalogName } = useParams()

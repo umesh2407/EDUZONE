@@ -13,29 +13,29 @@ const {
   getFullCourseDetails,
   getInstructorCourses,
   deleteCourse
-} = require("../controllers/Course")
+} = require("../controllers/course")
 
 
 // Categories Controllers Import
 const {
   showAllCategories,
   createCategory,
-  categoryPageDetails,
-} = require("../controllers/Category")
+  getCategoryPageDetails,
+} = require("../controllers/category")
 
 // Sections Controllers Import
 const {
   createSection,
   updateSection,
   deleteSection,
-} = require("../controllers/Section")
+} = require("../controllers/section")
 
 // Sub-Sections Controllers Import
 const {
   createSubSection,
   updateSubSection,
   deleteSubSection,
-} = require("../controllers/SubSection")
+} = require("../controllers/subSection")
 
 // Rating Controllers Import
 const {
@@ -91,7 +91,7 @@ router.post("/updateCourseProgress", auth, isStudent, updateCourseProgress);
 // TODO: Put IsAdmin Middleware here
 router.post("/createCategory", auth, isAdmin, createCategory)
 router.get("/showAllCategories", showAllCategories)
-router.post("/getCategoryPageDetails", categoryPageDetails)
+router.post("/getCategoryPageDetails", getCategoryPageDetails)
 
 // ********************************************************************************************************
 //                                      Rating and Review

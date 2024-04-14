@@ -5,11 +5,11 @@ const { auth, isInstructor } = require("../middlewares/auth")
 const {
   deleteAccount,
   updateProfile,
-  getAllUserDetails,
-  updateDisplayPicture,
+  getUserDetails,
+  updateUserProfileImage,
   getEnrolledCourses,
   instructorDashboard
-} = require("../controllers/Profile")
+} = require("../controllers/profile")
 
 // ********************************************************************************************************
 //                                      Profile routes
@@ -17,10 +17,10 @@ const {
 // Delet User Account
 router.delete("/deleteProfile", auth, deleteAccount)
 router.put("/updateProfile", auth, updateProfile)
-router.get("/getUserDetails", auth, getAllUserDetails)
+router.get("/getUserDetails", auth, getUserDetails)
 // Get Enrolled Courses
 router.get("/getEnrolledCourses", auth, getEnrolledCourses)
-router.put("/updateDisplayPicture", auth, updateDisplayPicture)
+router.put("/updateDisplayPicture", auth, updateUserProfileImage)
 router.get("/instructorDashboard", auth, isInstructor, instructorDashboard)
 
 module.exports = router
